@@ -16,6 +16,19 @@ This repository tracks the progression of building a local, open-source AI agent
   - [x] Configure the Strands client to point to the local Ollama endpoint instead of AWS Bedrock.
   - [x] Run a simple prompt-response execution loop to verify connectivity.
 
+## Module 1.5: The Architecture (Modular Configuration)
+**Goal:** Structure the project so the LLM provider (Ollama vs. AWS Bedrock) can be swapped out instantly using environment variables, keeping the agent logic provider-agnostic.
+
+- [x] **Step 1: The Config Module**
+  - [x] Create a `core/llm_factory.py` file.
+  - [x] Write a function `get_model()` that reads an environment variable (e.g., `PROVIDER=ollama` or `PROVIDER=bedrock`).
+  - [x] Return the correctly configured Model object (`OllamaModel` or `BedrockModel`).
+- [x] **Step 2: Refactoring "Hello World"**
+  - [x] Update `hello_world.py` to import and use the `get_model()` function instead of hardcoding Ollama.
+- [x] **Step 3: Test the Swap**
+  - [x] Run the code with `PROVIDER=ollama` to verify it still works locally.
+  - [x] (Optional) Run the code with `PROVIDER=bedrock` to see the exact same code use AWS Claude.
+
 ## Module 2: The Hands (Custom Tools & Structured Output)
 **Goal:** Teach the agent to interact with Python code and return predictable data formats.
 

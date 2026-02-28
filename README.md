@@ -38,5 +38,27 @@ Once activated, install the required packages:
 pip install -r requirements.txt
 ```
 
+### 5. Running the Agents
+By default, the agents in this repository are configured to run completely locally using **Ollama** as the model provider. 
+
+To run a basic test:
+```bash
+python3 hello_world.py
+```
+
+#### Swapping Model Providers
+This project uses a factory pattern (`core/llm_factory.py`) to easily swap between local models and cloud providers without changing the agent logic. You can control which model is used by setting the `LLM_PROVIDER` environment variable.
+
+**Run with local Ollama (Default):**
+```bash
+LLM_PROVIDER=ollama python3 hello_world.py
+```
+
+**Run with AWS Bedrock (Claude 3.5 Sonnet):**
+*(Requires valid AWS credentials in `~/.aws/credentials`)*
+```bash
+LLM_PROVIDER=bedrock python3 hello_world.py
+```
+
 ---
 *Follow along with the detailed progression in `docs/learning-journey.md`.*

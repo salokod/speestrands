@@ -1,25 +1,19 @@
 from strands import Agent
-from strands.models import OllamaModel
+from core.llm_factory import get_model
 
-# 1. Initialize the Ollama model
-# We tell the SDK to use the 'llama3' model running on your local machine
-# host is the url to your ollama server
-ollama_model = OllamaModel(
-    model_id="llama3",
-    host="http://192.168.30.195:11434"
-)
+# 1. Get the configured model from our factory
+active_model = get_model()
 
-# 2. Initialize the Agent
-# We pass the Ollama model to the agent, along with some basic instructions
+# 2. Initialize the Agent using whatever model the factory gave us
 agent = Agent(
-    name="LocalHomelabAgentpyt",
+    name="LocalHomelabAgent",
     system_prompt="You are a helpful AI assistant running locally on a homelab server.",
-    model=ollama_model
+    model=active_model
 )
 
 print(f"Agent '{agent.name}' initialized successfully!")
 
 # 3. Test the connection
-print("Sending a test prompt to Ollama...")
+print("Sending a test prompt...")
 response = agent("Say hello and tell me what model you are.")
 print(f"Response: {response}")
