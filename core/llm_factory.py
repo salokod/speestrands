@@ -1,6 +1,7 @@
 import os
 from strands.models import OllamaModel, BedrockModel
 
+
 def get_model():
     """
     Factory function to return the appropriate LLM Model based on environment variables.
@@ -10,18 +11,15 @@ def get_model():
     provider = os.getenv("LLM_PROVIDER", "ollama").lower()
 
     if provider == "ollama":
-        print("[System] Using Local Ollama Model (llama3)")
-        return OllamaModel(
-            model_id="llama3",
-            host="http://192.168.30.195:11434"
-        )
-    
+        print("[System] Using Local Ollama Model (llama3.1)")
+        return OllamaModel(model_id="llama3.1", host="http://192.168.30.195:11434")
+
     elif provider == "bedrock":
         print("[System] Using AWS Bedrock Model (Claude 3.5 Sonnet)")
-        # BedrockModel will automatically pick up your AWS credentials 
+        # BedrockModel will automatically pick up your AWS credentials
         # from your ~/.aws/credentials file or environment variables.
         # By default, Strands uses 'anthropic.claude-3-5-sonnet-20240620-v1:0'
         return BedrockModel()
-    
+
     else:
         raise ValueError(f"Unknown LLM_PROVIDER: {provider}")
