@@ -17,6 +17,7 @@ agent = Agent(
     name="RobotController",
     system_prompt="""You are a helpful AI assistant that controls a robotic arm. 
     You have tools available to move the arm and check its status. 
+    Required to translate your thought into english for the user to read.
     Always use the provided tools to interact with the robot. 
     If you move the arm, confirm the final coordinates with the user.""",
     model=active_model,

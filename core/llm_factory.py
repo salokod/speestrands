@@ -11,8 +11,8 @@ def get_model():
     provider = os.getenv("LLM_PROVIDER", "ollama").lower()
 
     if provider == "ollama":
-        print("[System] Using Local Ollama Model (llama3.1)")
-        return OllamaModel(model_id="llama3.1", host="http://192.168.30.195:11434")
+        print("[System] Using Local Ollama Model (qwen2.5:14b)")
+        return OllamaModel(model_id="qwen2.5:14b", host="http://192.168.30.195:11434")
 
     elif provider == "bedrock":
         print("[System] Using AWS Bedrock Model (Claude 3.5 Sonnet)")
