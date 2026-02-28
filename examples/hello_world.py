@@ -1,5 +1,6 @@
 import sys
 from pathlib import Path
+
 # Add the parent directory (repository root) to the Python path
 sys.path.append(str(Path(__file__).parent.parent))
 
@@ -13,7 +14,7 @@ active_model = get_model()
 agent = Agent(
     name="LocalHomelabAgent",
     system_prompt="You are a helpful AI assistant running locally on a homelab server.",
-    model=active_model
+    model=active_model,
 )
 
 print(f"Agent '{agent.name}' initialized successfully!")

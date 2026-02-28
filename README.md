@@ -60,5 +60,20 @@ LLM_PROVIDER=ollama python3 examples/hello_world.py
 LLM_PROVIDER=bedrock python3 examples/hello_world.py
 ```
 
+### 6. Code Quality (Linting & Formatting)
+This project uses [Ruff](https://docs.astral.sh/ruff/), an extremely fast Python linter and formatter, to maintain code quality and prevent syntax errors.
+
+Before committing code, it is highly recommended to run Ruff from the root of the repository:
+
+**To find and automatically fix syntax/import errors:**
+```bash
+ruff check --fix .
+```
+
+**To automatically format your code (spacing, quotes, etc.):**
+```bash
+ruff format .
+```
+
 ---
 *Follow along with the detailed progression in `docs/learning-journey.md`.*

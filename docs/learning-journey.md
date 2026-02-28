@@ -32,14 +32,14 @@ This repository tracks the progression of building a local, open-source AI agent
 ## Module 2: The Hands (Custom Tools & Structured Output)
 **Goal:** Teach the agent to interact with Python code and return predictable data formats.
 
-- [ ] **Step 1: Custom Tool Creation**
-  - [ ] Create a mock "robot controller" Python function (e.g., `move_arm(x, y, z)`) that simply prints its actions.
-  - [ ] Wrap the function using the Strands `@tool` decorator.
-- [ ] **Step 2: Tool Execution**
-  - [ ] Register the tool with the Agent.
-  - [ ] Prompt the agent to "move the arm to coordinates 10, 20, 30" and verify the tool executes.
-- [ ] **Step 3: Structured Output**
-  - [ ] Configure the agent to return its final summary strictly as a JSON object containing `{"action_taken": string, "success": boolean}`.
+- [x] **Step 1: Custom Tool Creation**
+  - [x] Create a mock "robot controller" Python function (e.g., `move_arm(x, y, z)`) that simply prints its actions.
+  - [x] Wrap the function using the Strands `@tool` decorator.
+- [x] **Step 2: Tool Execution**
+  - [x] Register the tool with the Agent.
+  - [x] Prompt the agent to "move the arm to coordinates 10, 20, 30" and verify the tool executes.
+- [x] **Step 3: Structured Output**
+  - [x] Configure the agent to return its final summary strictly as a JSON object containing `{"action_taken": string, "success": boolean}`.
 
 ## Module 3: The Memory (State & Session Management)
 **Goal:** Enable the agent to remember context across a multi-step conversation.
