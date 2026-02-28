@@ -1,0 +1,26 @@
+# Node.js vs Python Ignore List
+
+# Dependencies
+# In Node you ignore node_modules/, in Python you ignore the virtual environment folder.
+strands_env/
+venv/
+.venv/
+env/
+
+# Cache files
+# Python compiles source files (.py) into bytecode (.pyc) for faster loading.
+# These are placed in __pycache__ folders. We never commit these.
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Environment variables
+# Just like Node, we don't commit our secrets or local configs.
+.env
+.env.local
+
+# IDE/OS specific
+.vscode/
+.idea/
+.DS_Store
