@@ -5,16 +5,29 @@ This repository tracks the progression of building a local, open-source AI agent
 ## Module 1: The Foundation (Hello Local AI)
 **Goal:** Get a local AI agent running for free and understand the basic Agent Loop.
 
-- [ ] **Step 1: Spin up Local AI**
-  - [ ] Deploy Ollama as a Docker container on the homelab server.
-  - [ ] Pull a fast open-weights model: `docker exec -it <container_name> ollama run llama3`.
-- [ ] **Step 2: Install the Strands SDK**
-  - [ ] Create a Python virtual environment: `python -m venv strands_env`.
-  - [ ] Activate the environment and install dependencies: `pip install strands-agents strands-agents-tools`.
-- [ ] **Step 3: The "Hello World" Agent**
-  - [ ] Write a `hello_agent.py` script.
-  - [ ] Configure the Strands client to point to the local Ollama endpoint instead of AWS Bedrock.
-  - [ ] Run a simple prompt-response execution loop to verify connectivity.
+- [x] **Step 1: Spin up Local AI**
+  - [x] Deploy Ollama as a Docker container on the homelab server.
+  - [x] Pull a fast open-weights model: `docker exec -it <container_name> ollama run llama3`.
+- [x] **Step 2: Install the Strands SDK**
+  - [x] Create a Python virtual environment: `python -m venv strands_env`.
+  - [x] Activate the environment and install dependencies: `pip install strands-agents strands-agents-tools`.
+- [x] **Step 3: The "Hello World" Agent**
+  - [x] Write a `hello_agent.py` script.
+  - [x] Configure the Strands client to point to the local Ollama endpoint instead of AWS Bedrock.
+  - [x] Run a simple prompt-response execution loop to verify connectivity.
+
+## Module 1.5: The Architecture (Modular Configuration)
+**Goal:** Structure the project so the LLM provider (Ollama vs. AWS Bedrock) can be swapped out instantly using environment variables, keeping the agent logic provider-agnostic.
+
+- [x] **Step 1: The Config Module**
+  - [x] Create a `core/llm_factory.py` file.
+  - [x] Write a function `get_model()` that reads an environment variable (e.g., `PROVIDER=ollama` or `PROVIDER=bedrock`).
+  - [x] Return the correctly configured Model object (`OllamaModel` or `BedrockModel`).
+- [x] **Step 2: Refactoring "Hello World"**
+  - [x] Update `hello_world.py` to import and use the `get_model()` function instead of hardcoding Ollama.
+- [x] **Step 3: Test the Swap**
+  - [x] Run the code with `PROVIDER=ollama` to verify it still works locally.
+  - [x] (Optional) Run the code with `PROVIDER=bedrock` to see the exact same code use AWS Claude.
 
 ## Module 2: The Hands (Custom Tools & Structured Output)
 **Goal:** Teach the agent to interact with Python code and return predictable data formats.
