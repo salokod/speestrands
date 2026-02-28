@@ -43,7 +43,7 @@ By default, the agents in this repository are configured to run completely local
 
 To run a basic test:
 ```bash
-python3 hello_world.py
+python3 examples/hello_world.py
 ```
 
 #### Swapping Model Providers
@@ -51,13 +51,13 @@ This project uses a factory pattern (`core/llm_factory.py`) to easily swap betwe
 
 **Run with local Ollama (Default):**
 ```bash
-LLM_PROVIDER=ollama python3 hello_world.py
+LLM_PROVIDER=ollama python3 examples/hello_world.py
 ```
 
 **Run with AWS Bedrock (Claude 3.5 Sonnet):**
 *(Requires valid AWS credentials in `~/.aws/credentials`)*
 ```bash
-LLM_PROVIDER=bedrock python3 hello_world.py
+LLM_PROVIDER=bedrock python3 examples/hello_world.py
 ```
 
 ---

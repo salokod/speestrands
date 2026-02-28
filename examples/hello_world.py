@@ -1,3 +1,8 @@
+import sys
+from pathlib import Path
+# Add the parent directory (repository root) to the Python path
+sys.path.append(str(Path(__file__).parent.parent))
+
 from strands import Agent
 from core.llm_factory import get_model
 
