@@ -1,0 +1,22 @@
+{
+  "message": {
+    "role": "assistant",
+    "content": [
+      {
+        "toolUse": {
+          "toolUseId": "move_arm",
+          "name": "move_arm",
+          "input": {
+            "z": 10,
+            "x": 10,
+            "y": 10
+          }
+        }
+      }
+    ]
+  },
+  "message_id": 1,
+  "redact_message": null,
+  "created_at": "2026-03-01T03:45:01.672225+00:00",
+  "updated_at": "2026-03-01T03:45:01.672229+00:00"
+}

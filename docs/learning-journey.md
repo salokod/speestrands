@@ -42,33 +42,60 @@ This repository tracks the progression of building a local, open-source AI agent
   - [x] Configure the agent to return its final summary strictly as a JSON object containing `{"action_taken": string, "success": boolean}`.
 
 ## Module 3: The Memory (State & Session Management)
-**Goal:** Enable the agent to remember context across a multi-step conversation.
+**Goal:** Enable the agent to remember context across a multi-step conversation and stream responses in real-time.
 
-- [ ] **Step 1: Session Management**
-  - [ ] Implement a basic File or SQLite Session Manager from the Strands SDK.
-- [ ] **Step 2: Multi-Turn Conversation**
-  - [ ] Prompt the agent: "I want to build a tower. Step 1 is placing block A."
-  - [ ] In a separate prompt execution, ask: "What was step 1? Now for step 2, place block B on top."
-  - [ ] Verify the agent recalls the history.
-- [ ] **Step 3: Context Limits**
-  - [ ] Implement a "Sliding Window" conversation manager to ensure the local LLM doesn't crash from context overflow during long chats.
+- [x] **Step 1: Session Management**
+  - [x] Implement `FileSessionManager` from the Strands SDK.
+  - [x] Use Python's `uuid` module to generate dynamic, unique folders for each session.
+  - [x] Suppress SDK UserWarnings (e.g., the `**kwargs` deprecation warning) to keep terminal logs clean.
+- [x] **Step 2: Multi-Turn Conversation**
+  - [x] Prompt the agent: "I want to build a tower. Step 1 is moving the arm to X:10, Y:10, Z:10."
+  - [x] In a sequential prompt, ask: "What were the coordinates for Step 1?"
+  - [x] Verify the agent recalls the history from the persisted session file.
+- [x] **Step 3: Context Limits**
+  - [x] Import and configure `SlidingWindowConversationManager` to cap the rolling context window.
+  - [x] Understand the trade-off: older turns are dropped to prevent local LLM context overflow.
+  - [x] Note the alternative: `NullConversationManager` for fully stateless (no history) agents.
+- [x] **Step 4: Real-Time Streaming**
+  - [x] Use a **callback handler** (`on_stream_event`) to print text chunks as the agent generates them.
+  - [x] Understand the event types: lifecycle, model stream, tool, and multi-agent events.
+  - [x] Contrast with `stream=False` (used in Step 2) — notice the difference in perceived responsiveness.
 
-## Module 4: The Team (Multi-Agent Basics)
-**Goal:** Distribute complex tasks across specialized agents.
+## Module 4: The Team (Multi-Agent Systems)
+**Goal:** Distribute complex tasks across specialized agents using multiple coordination patterns.
 
 - [ ] **Step 1: Agents as Tools**
   - [ ] Create an `ExecutorAgent` with the `move_arm` tool.
-  - [ ] Create a `PlannerAgent` that has no tools, but can call the `ExecutorAgent` as a tool to accomplish a goal.
+  - [ ] Create a `PlannerAgent` that has no tools, but wraps `ExecutorAgent` as a callable tool.
+  - [ ] Prompt the `PlannerAgent` to "build a 3-block tower" and verify it delegates steps to `ExecutorAgent`.
 - [ ] **Step 2: Agent2Agent (A2A)**
-  - [ ] Prompt the `PlannerAgent` to "build a 3-block tower." Verify it breaks down the plan and hands off the steps to the `ExecutorAgent`.
+  - [ ] Explore how the `PlannerAgent` and `ExecutorAgent` exchange structured messages during the handoff.
+  - [ ] Observe the multi-agent events emitted in the stream (node execution, handoffs).
+- [ ] **Step 3: Graphs (DAG Workflows)**
+  - [ ] Define a 3-node pipeline: `Planner → Executor → Reviewer`.
+  - [ ] Wire the nodes using the SDK's Graph API so output from one node feeds the next.
+  - [ ] Run the graph with a single "Build the beam assembly" prompt and observe the structured handoffs.
+
+## Module 4.5: The Protocol (MCP Tools)
+**Goal:** Expose external capabilities to the agent using the Model Context Protocol — the SDK's standard for third-party tool integration.
+
+- [ ] **Step 1: Local Filesystem MCP Server**
+  - [ ] Install and run a local MCP filesystem server (e.g., `npx @modelcontextprotocol/server-filesystem`).
+  - [ ] Connect it to the agent using `MCPClient` from `strands.tools.mcp`.
+- [ ] **Step 2: Agent-Driven Discovery**
+  - [ ] Prompt the agent to list the contents of the `examples/` directory using only the MCP tools.
+  - [ ] Verify the agent discovers and reads files without any custom Python tool code.
 
 ## Module 5: The Supervisor (Human-in-the-Loop)
-**Goal:** Add safety guardrails before executing "dangerous" code.
+**Goal:** Add safety guardrails using SDK Hooks before executing "dangerous" actions.
 
-- [ ] **Step 1: Interrupts**
-  - [ ] Configure the agent to pause execution *before* running the `move_arm` tool.
-  - [ ] Prompt the user in the CLI to type "Y/N" to approve the movement.
-  - [ ] Resume the agent's execution loop based on the human's input.
+- [ ] **Step 1: Lifecycle Hooks**
+  - [ ] Register a `before_tool_call` hook on the agent.
+  - [ ] In the hook, inspect the tool name — if it is `move_arm`, pause and prompt the user.
+- [ ] **Step 2: Human Approval Gate**
+  - [ ] In the hook, print the planned coordinates and ask the user to type Y/N in the CLI.
+  - [ ] If "N", raise an exception to abort the tool call; if "Y", allow execution to continue.
+  - [ ] Verify that the agent loop resumes correctly after an approved or rejected action.
 
 ## Module 6: The Capstone (ASAP Physics Integration)
 **Goal:** Replace the mock tools with the real MIT robotic assembly simulator.
@@ -78,13 +105,15 @@ This repository tracks the progression of building a local, open-source AI agent
 - [ ] **Step 2: Real Tooling**
   - [ ] Create a new tool: `plan_cad_assembly(assembly_name: str)`.
   - [ ] Use Python's `subprocess` to trigger the ASAP `run_seq_plan.py` script.
-- [ ] **Step 3: Orchestration**
-  - [ ] Have the `PlannerAgent` receive a request ("Build the beam_assembly"), trigger the ASAP tool, and have a `ReviewerAgent` summarize the generated logs into a markdown report.
+- [ ] **Step 3: Full Orchestration**
+  - [ ] Wire up the Module 4 Graph: `PlannerAgent → ASAP ExecutorAgent → ReviewerAgent`.
+  - [ ] Have `ReviewerAgent` summarize the ASAP output logs into a markdown report.
+  - [ ] Keep the Module 5 human approval gate active before any `plan_cad_assembly` call.
 
 ## Module 7: Advanced Homelab Escalation (Optional)
-**Goal:** Scale the system.
+**Goal:** Scale the system with real-world data.
 
-- [ ] **Step 1: Model Context Protocol (MCP)**
-  - [ ] Connect a local file-system MCP server so the agent can discover new CAD files automatically.
-- [ ] **Step 2: Custom Data**
-  - [ ] Run the pipeline on a custom `.obj` downloaded from the internet.
+- [ ] **Step 1: Custom Data**
+  - [ ] Download a custom `.obj` assembly file from the internet.
+  - [ ] Use the MCP filesystem server (from Module 4.5) so the `PlannerAgent` discovers it automatically.
+  - [ ] Run the full pipeline end-to-end without hardcoding the assembly name.

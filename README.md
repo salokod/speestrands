@@ -76,4 +76,31 @@ ruff format .
 ```
 
 ---
+
+## Examples
+
+Each file in `examples/` builds on the previous one. Run them in order to follow the learning progression.
+
+| File | Module | What it teaches |
+|---|---|---|
+| `hello_world.py` | 1 | Bare minimum agent — connect to a local Ollama model and get a response |
+| `robot_agent.py` | 2 | Custom tools — wrap a Python function with `@tool` so the agent can call it |
+| `structured_agent.py` | 2 | Structured output — force the agent to return a validated Pydantic object instead of plain text |
+| `memory_agent.py` | 3 | Session memory — persist conversation history to disk so the agent remembers across prompts |
+| `context_agent.py` | 3 | Context limits — explicitly control how many messages the model sees at once with `SlidingWindowConversationManager` |
+| `streaming_agent.py` | 3 | Streaming — intercept text chunks and tool calls as they arrive via a callback handler |
+
+## Key Concepts
+
+**`core/llm_factory.py`** — Provider factory. All examples import `get_model()` from here instead of hardcoding a model. Set `LLM_PROVIDER=bedrock` to switch from local Ollama to AWS Claude without touching agent code.
+
+**`src/tools/robot_tools.py`** — Shared mock tools (`move_arm`, `get_arm_status`) used across examples. These simulate a robotic arm and will be replaced with the real MIT ASAP simulator in Module 6.
+
+**`FileSessionManager`** — Writes conversation history to `.agent_sessions/` on disk. The agent can pick up where it left off across separate script runs.
+
+**`SlidingWindowConversationManager`** — Caps how many messages are loaded into the model's active context per call. Protects local models from context overflow on long conversations. Default window is 40; tune it down for smaller models.
+
+**`callback_handler`** — A function you wire into the agent that fires on every streaming event. Use it to print text as it arrives, display tool calls in progress, or pipe output to a UI.
+
+---
 *Follow along with the detailed progression in `docs/learning-journey.md`.*
