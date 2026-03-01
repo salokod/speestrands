@@ -64,13 +64,13 @@ This repository tracks the progression of building a local, open-source AI agent
 ## Module 4: The Team (Multi-Agent Systems)
 **Goal:** Distribute complex tasks across specialized agents using multiple coordination patterns.
 
-- [ ] **Step 1: Agents as Tools**
-  - [ ] Create an `ExecutorAgent` with the `move_arm` tool.
-  - [ ] Create a `PlannerAgent` that has no tools, but wraps `ExecutorAgent` as a callable tool.
-  - [ ] Prompt the `PlannerAgent` to "build a 3-block tower" and verify it delegates steps to `ExecutorAgent`.
-- [ ] **Step 2: Agent2Agent (A2A)**
-  - [ ] Explore how the `PlannerAgent` and `ExecutorAgent` exchange structured messages during the handoff.
-  - [ ] Observe the multi-agent events emitted in the stream (node execution, handoffs).
+- [x] **Step 1: Agents as Tools**
+  - [x] Create an `ExecutorAgent` with the `move_arm` tool.
+  - [x] Create a `PlannerAgent` that has no tools, but wraps `ExecutorAgent` as a callable tool.
+  - [x] Prompt the `PlannerAgent` to "build a 3-block tower" and verify it delegates steps to `ExecutorAgent`.
+- [x] **Step 2: Agent2Agent (A2A)**
+  - [x] Explore how the `PlannerAgent` and `ExecutorAgent` exchange structured messages during the handoff.
+  - [x] Observe the multi-agent events emitted in the stream (node execution, handoffs).
 - [ ] **Step 3: Graphs (DAG Workflows)**
   - [ ] Define a 3-node pipeline: `Planner → Executor → Reviewer`.
   - [ ] Wire the nodes using the SDK's Graph API so output from one node feeds the next.
