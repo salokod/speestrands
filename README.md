@@ -39,7 +39,7 @@ pip install -r requirements.txt
 ```
 
 ### 5. Running the Agents
-By default, the agents in this repository are configured to run completely locally using **Ollama** as the model provider. 
+By default, the agents in this repository are configured to run completely locally using **Ollama** as the model provider.
 
 To run a basic test:
 ```bash
@@ -91,6 +91,8 @@ Each file in `examples/` builds on the previous one. Run them in order to follow
 | `streaming_agent.py` | 3 | Streaming — intercept text chunks and tool calls as they arrive via a callback handler |
 | `multi_agent.py` | 4 | Agents as tools — wrap an `ExecutorAgent` with `@tool` so a `PlannerAgent` can delegate to it; demonstrates a full multi-agent chain: `PlannerAgent → executor_agent() → ExecutorAgent → move_arm()` |
 | `graph_agent.py` | 4 | Graph pipeline — wire three agents (`Planner → Executor → Reviewer`) using `GraphBuilder`; output from each node feeds automatically into the next; inspect each node's result independently via `result.results` |
+| `mcp_agent.py` | 4.5 | MCP tools — connect to a local filesystem MCP server via `MCPClient`; the agent discovers and uses `search_files` and `read_text_file` without any custom tool code |
+| `robot_mcp_agent.py` | 4.5 | Custom MCP server — connect to `mcp_server/server.py` (our own FastMCP server) instead of a third-party server; the agent calls `move_arm` and `get_arm_status` through the MCP wire protocol with no direct Python imports |
 
 ## Key Concepts
 
@@ -107,6 +109,10 @@ Each file in `examples/` builds on the previous one. Run them in order to follow
 **Agents as Tools** — Wrap any agent function with `@tool` so a higher-level orchestrator can call it like any other tool. The orchestrator doesn't know or care that a full agent loop is running inside — it just sees a function with a name and a docstring.
 
 **`GraphBuilder`** — Declares a deterministic pipeline of agents. `add_node` registers an agent, `add_edge` declares which node feeds which, `set_entry_point` defines where the prompt enters. The SDK handles execution order and automatically passes each node's output as context to the next. Independent nodes run in parallel; dependent nodes wait. Access every node's output after the run via `result.results["node_id"].result`.
+
+**`MCPClient`** — Connects the agent to an external MCP server. Use `stdio_client` for local subprocess servers (development) and `streamablehttp_client` for remote HTTP servers (production). The agent discovers available tools at runtime via the MCP handshake — no custom tool code required on the consumer side.
+
+**`mcp_server/server.py`** — A custom FastMCP server that wraps the `move_arm` and `get_arm_status` tool implementations and exposes them over the MCP protocol. In production, this server would run as a standalone service (Docker container, ECS task) and the agent would connect over HTTP instead of stdio — zero code changes on either side.
 
 ---
 *Follow along with the detailed progression in `docs/learning-journey.md`.*
