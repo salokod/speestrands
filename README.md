@@ -93,6 +93,7 @@ Each file in `examples/` builds on the previous one. Run them in order to follow
 | `graph_agent.py` | 4 | Graph pipeline — wire three agents (`Planner → Executor → Reviewer`) using `GraphBuilder`; output from each node feeds automatically into the next; inspect each node's result independently via `result.results` |
 | `mcp_agent.py` | 4.5 | MCP tools — connect to a local filesystem MCP server via `MCPClient`; the agent discovers and uses `search_files` and `read_text_file` without any custom tool code |
 | `robot_mcp_agent.py` | 4.5 | Custom MCP server — connect to `mcp_server/server.py` (our own FastMCP server) instead of a third-party server; the agent calls `move_arm` and `get_arm_status` through the MCP wire protocol with no direct Python imports |
+| `hitl_agent.py` | 5 | Human-in-the-loop — register a `before_tool_call` hook via `agent.add_hook()`; the hook intercepts `move_arm` calls, prints the planned coordinates, and requires operator approval before the tool executes |
 
 ## Key Concepts
 
@@ -111,6 +112,8 @@ Each file in `examples/` builds on the previous one. Run them in order to follow
 **`GraphBuilder`** — Declares a deterministic pipeline of agents. `add_node` registers an agent, `add_edge` declares which node feeds which, `set_entry_point` defines where the prompt enters. The SDK handles execution order and automatically passes each node's output as context to the next. Independent nodes run in parallel; dependent nodes wait. Access every node's output after the run via `result.results["node_id"].result`.
 
 **`MCPClient`** — Connects the agent to an external MCP server. Use `stdio_client` for local subprocess servers (development) and `streamablehttp_client` for remote HTTP servers (production). The agent discovers available tools at runtime via the MCP handshake — no custom tool code required on the consumer side.
+
+**Lifecycle Hooks** — Functions registered via `agent.add_hook()` that fire at specific points in the agent loop. The SDK infers which event to attach to from the function's type hint (e.g. `BeforeToolCallEvent`). Set `event.cancel_tool = "reason"` to block a tool call — the agent receives your message as the tool result and responds accordingly.
 
 **`mcp_server/server.py`** — A custom FastMCP server that wraps the `move_arm` and `get_arm_status` tool implementations and exposes them over the MCP protocol. In production, this server would run as a standalone service (Docker container, ECS task) and the agent would connect over HTTP instead of stdio — zero code changes on either side.
 
