@@ -94,13 +94,16 @@ This repository tracks the progression of building a local, open-source AI agent
 ## Module 5: The Supervisor (Human-in-the-Loop)
 **Goal:** Add safety guardrails using SDK Hooks before executing "dangerous" actions.
 
-- [ ] **Step 1: Lifecycle Hooks**
-  - [ ] Register a `before_tool_call` hook on the agent.
-  - [ ] In the hook, inspect the tool name — if it is `move_arm`, pause and prompt the user.
-- [ ] **Step 2: Human Approval Gate**
-  - [ ] In the hook, print the planned coordinates and ask the user to type Y/N in the CLI.
-  - [ ] If "N", raise an exception to abort the tool call; if "Y", allow execution to continue.
-  - [ ] Verify that the agent loop resumes correctly after an approved or rejected action.
+- [x] **Step 1: Lifecycle Hooks**
+  - [x] Register a `before_tool_call` hook on the agent via `agent.add_hook()`.
+  - [x] The SDK infers which lifecycle event to attach by reading the function's type hint (`BeforeToolCallEvent`).
+  - [x] `event.tool_use["name"]` identifies the tool; `event.tool_use["input"]` exposes the arguments.
+- [x] **Step 2: Human Approval Gate**
+  - [x] Filter to `move_arm` only — let `get_arm_status` and other tools pass through unblocked.
+  - [x] Print the planned coordinates and ask the operator to type y/n in the CLI.
+  - [x] If "n": set `event.cancel_tool` with a message — the tool never runs; the agent receives the message as the tool result.
+  - [x] If "y": return normally — execution continues unchanged.
+  - [x] Verified: agent handles rejection gracefully and does not retry after "Do not retry." message.
 
 ## Module 6: The Capstone (Production-Grade ASAP Integration)
 **Goal:** Replace the mock tools with the real MIT robotic assembly simulator and make the system look and feel production-ready — proper CLI, config, structured reports, and all previous modules working together.
