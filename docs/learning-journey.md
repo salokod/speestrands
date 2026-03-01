@@ -52,10 +52,10 @@ This repository tracks the progression of building a local, open-source AI agent
   - [x] Prompt the agent: "I want to build a tower. Step 1 is moving the arm to X:10, Y:10, Z:10."
   - [x] In a sequential prompt, ask: "What were the coordinates for Step 1?"
   - [x] Verify the agent recalls the history from the persisted session file.
-- [ ] **Step 3: Context Limits**
-  - [ ] Import and configure `SlidingWindowConversationManager` to cap the rolling context window.
-  - [ ] Understand the trade-off: older turns are dropped to prevent local LLM context overflow.
-  - [ ] Note the alternative: `NullConversationManager` for fully stateless (no history) agents.
+- [x] **Step 3: Context Limits**
+  - [x] Import and configure `SlidingWindowConversationManager` to cap the rolling context window.
+  - [x] Understand the trade-off: older turns are dropped to prevent local LLM context overflow.
+  - [x] Note the alternative: `NullConversationManager` for fully stateless (no history) agents.
 - [ ] **Step 4: Real-Time Streaming**
   - [ ] Use a **callback handler** (`on_stream_event`) to print text chunks as the agent generates them.
   - [ ] Understand the event types: lifecycle, model stream, tool, and multi-agent events.
