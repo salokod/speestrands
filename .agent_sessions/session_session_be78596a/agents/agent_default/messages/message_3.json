@@ -1,0 +1,18 @@
+{
+  "message": {
+    "role": "assistant",
+    "content": [
+      {
+        "toolUse": {
+          "toolUseId": "get_arm_status",
+          "name": "get_arm_status",
+          "input": {}
+        }
+      }
+    ]
+  },
+  "message_id": 3,
+  "redact_message": null,
+  "created_at": "2026-03-01T03:45:53.521020+00:00",
+  "updated_at": "2026-03-01T03:45:53.521028+00:00"
+}
