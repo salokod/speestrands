@@ -79,12 +79,12 @@ This repository tracks the progression of building a local, open-source AI agent
 ## Module 4.5: The Protocol (MCP Tools)
 **Goal:** Expose external capabilities to the agent using the Model Context Protocol — the SDK's standard for third-party tool integration.
 
-- [ ] **Step 1: Local Filesystem MCP Server**
-  - [ ] Install and run a local MCP filesystem server (e.g., `npx @modelcontextprotocol/server-filesystem`).
-  - [ ] Connect it to the agent using `MCPClient` from `strands.tools.mcp`.
-- [ ] **Step 2: Agent-Driven Discovery**
-  - [ ] Prompt the agent to list the contents of the `examples/` directory using only the MCP tools.
-  - [ ] Verify the agent discovers and reads files without any custom Python tool code.
+- [x] **Step 1: Local Filesystem MCP Server**
+  - [x] Install and run a local MCP filesystem server (e.g., `npx @modelcontextprotocol/server-filesystem`).
+  - [x] Connect it to the agent using `MCPClient` from `strands.tools.mcp`.
+- [x] **Step 2: Agent-Driven Discovery**
+  - [x] Prompt the agent to list the contents of the `examples/` directory using only the MCP tools.
+  - [x] Verify the agent discovers and reads files without any custom Python tool code.
 
 ## Module 5: The Supervisor (Human-in-the-Loop)
 **Goal:** Add safety guardrails using SDK Hooks before executing "dangerous" actions.

@@ -90,6 +90,8 @@ Each file in `examples/` builds on the previous one. Run them in order to follow
 | `context_agent.py` | 3 | Context limits — explicitly control how many messages the model sees at once with `SlidingWindowConversationManager` |
 | `streaming_agent.py` | 3 | Streaming — intercept text chunks and tool calls as they arrive via a callback handler |
 
+| `mcp_agent.py` | 4.5 | MCP tools — connect to a local filesystem MCP server via `MCPClient`; the agent discovers and uses `search_files` and `read_text_file` without any custom tool code |
+
 ## Key Concepts
 
 **`core/llm_factory.py`** — Provider factory. All examples import `get_model()` from here instead of hardcoding a model. Set `LLM_PROVIDER=bedrock` to switch from local Ollama to AWS Claude without touching agent code.
