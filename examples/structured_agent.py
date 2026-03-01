@@ -5,6 +5,10 @@ from pydantic import BaseModel, Field
 # Setup path so we can import our custom modules
 sys.path.append(str(Path(__file__).parent.parent))
 
+from strands import Agent
+from core.llm_factory import get_model
+from src.tools.robot_tools import move_arm, get_arm_status
+
 # 1. Define the Structured Output Schema using Pydantic
 class RobotSummary(BaseModel):
     action_taken: str = Field(
@@ -16,10 +20,6 @@ class RobotSummary(BaseModel):
     final_coordinates: list[float] = Field(
         description="The final [x, y, z] coordinates of the arm."
     )
-
-from strands import Agent
-from core.llm_factory import get_model
-from src.tools.robot_tools import move_arm, get_arm_status
 
 # 2. Get the configured model from our factory
 active_model = get_model()
