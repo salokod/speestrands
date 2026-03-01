@@ -85,6 +85,11 @@ This repository tracks the progression of building a local, open-source AI agent
 - [x] **Step 2: Agent-Driven Discovery**
   - [x] Prompt the agent to list the contents of the `examples/` directory using only the MCP tools.
   - [x] Verify the agent discovers and reads files without any custom Python tool code.
+- [x] **Step 3: Your Own MCP Server**
+  - [x] Build `mcp_server/server.py` using FastMCP — expose `move_arm` and `get_arm_status` as MCP tools.
+  - [x] Write `examples/robot_mcp_agent.py` — connect to the custom server via `stdio_client`.
+  - [x] Verify the agent discovers tools at runtime and calls them through the MCP wire protocol.
+  - [x] Observe `CallToolRequest` log lines from the server — confirms tool calls travel over MCP, not direct Python calls.
 
 ## Module 5: The Supervisor (Human-in-the-Loop)
 **Goal:** Add safety guardrails using SDK Hooks before executing "dangerous" actions.
