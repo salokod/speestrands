@@ -56,10 +56,10 @@ This repository tracks the progression of building a local, open-source AI agent
   - [x] Import and configure `SlidingWindowConversationManager` to cap the rolling context window.
   - [x] Understand the trade-off: older turns are dropped to prevent local LLM context overflow.
   - [x] Note the alternative: `NullConversationManager` for fully stateless (no history) agents.
-- [ ] **Step 4: Real-Time Streaming**
-  - [ ] Use a **callback handler** (`on_stream_event`) to print text chunks as the agent generates them.
-  - [ ] Understand the event types: lifecycle, model stream, tool, and multi-agent events.
-  - [ ] Contrast with `stream=False` (used in Step 2) — notice the difference in perceived responsiveness.
+- [x] **Step 4: Real-Time Streaming**
+  - [x] Use a **callback handler** (`on_stream_event`) to print text chunks as the agent generates them.
+  - [x] Understand the event types: lifecycle, model stream, tool, and multi-agent events.
+  - [x] Contrast with `stream=False` (used in Step 2) — notice the difference in perceived responsiveness.
 
 ## Module 4: The Team (Multi-Agent Systems)
 **Goal:** Distribute complex tasks across specialized agents using multiple coordination patterns.
