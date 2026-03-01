@@ -24,3 +24,7 @@ __pycache__/
 .vscode/
 .idea/
 .DS_Store
+
+# Agent session files
+# Generated at runtime by FileSessionManager — never commit these.
+.agent_sessions/

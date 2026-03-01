@@ -64,17 +64,17 @@ This repository tracks the progression of building a local, open-source AI agent
 ## Module 4: The Team (Multi-Agent Systems)
 **Goal:** Distribute complex tasks across specialized agents using multiple coordination patterns.
 
-- [ ] **Step 1: Agents as Tools**
-  - [ ] Create an `ExecutorAgent` with the `move_arm` tool.
-  - [ ] Create a `PlannerAgent` that has no tools, but wraps `ExecutorAgent` as a callable tool.
-  - [ ] Prompt the `PlannerAgent` to "build a 3-block tower" and verify it delegates steps to `ExecutorAgent`.
-- [ ] **Step 2: Agent2Agent (A2A)**
-  - [ ] Explore how the `PlannerAgent` and `ExecutorAgent` exchange structured messages during the handoff.
-  - [ ] Observe the multi-agent events emitted in the stream (node execution, handoffs).
-- [ ] **Step 3: Graphs (DAG Workflows)**
-  - [ ] Define a 3-node pipeline: `Planner → Executor → Reviewer`.
-  - [ ] Wire the nodes using the SDK's Graph API so output from one node feeds the next.
-  - [ ] Run the graph with a single "Build the beam assembly" prompt and observe the structured handoffs.
+- [x] **Step 1: Agents as Tools**
+  - [x] Create an `ExecutorAgent` with the `move_arm` tool.
+  - [x] Create a `PlannerAgent` that has no tools, but wraps `ExecutorAgent` as a callable tool.
+  - [x] Prompt the `PlannerAgent` to "build a 3-block tower" and verify it delegates steps to `ExecutorAgent`.
+- [x] **Step 2: Agent2Agent (A2A)**
+  - [x] Explore how the `PlannerAgent` and `ExecutorAgent` exchange structured messages during the handoff.
+  - [x] Observe the multi-agent events emitted in the stream (node execution, handoffs).
+- [x] **Step 3: Graphs (DAG Workflows)**
+  - [x] Define a 3-node pipeline: `Planner → Executor → Reviewer`.
+  - [x] Wire the nodes using the SDK's Graph API so output from one node feeds the next.
+  - [x] Run the graph with a single "Build the beam assembly" prompt and observe the structured handoffs.
 
 ## Module 4.5: The Protocol (MCP Tools)
 **Goal:** Expose external capabilities to the agent using the Model Context Protocol — the SDK's standard for third-party tool integration.
@@ -85,6 +85,9 @@ This repository tracks the progression of building a local, open-source AI agent
 - [ ] **Step 2: Agent-Driven Discovery**
   - [ ] Prompt the agent to list the contents of the `examples/` directory using only the MCP tools.
   - [ ] Verify the agent discovers and reads files without any custom Python tool code.
+- [ ] **Step 3: Expose Your Own Tools as an MCP Server (Optional)**
+  - [ ] Wrap `move_arm` and `get_arm_status` in a standalone MCP server using the `mcp` Python package.
+  - [ ] Connect the Strands agent to your own server — any MCP-compatible agent (LangChain, Claude, etc.) can now use your robot tools without touching your source code.
 
 ## Module 5: The Supervisor (Human-in-the-Loop)
 **Goal:** Add safety guardrails using SDK Hooks before executing "dangerous" actions.
@@ -97,8 +100,8 @@ This repository tracks the progression of building a local, open-source AI agent
   - [ ] If "N", raise an exception to abort the tool call; if "Y", allow execution to continue.
   - [ ] Verify that the agent loop resumes correctly after an approved or rejected action.
 
-## Module 6: The Capstone (ASAP Physics Integration)
-**Goal:** Replace the mock tools with the real MIT robotic assembly simulator.
+## Module 6: The Capstone (Production-Grade ASAP Integration)
+**Goal:** Replace the mock tools with the real MIT robotic assembly simulator and make the system look and feel production-ready — proper CLI, config, structured reports, and all previous modules working together.
 
 - [ ] **Step 1: Clone the ASAP Environment**
   - [ ] Clone `https://github.com/yunshengtian/ASAP.git` and install its specific dependencies (`trimesh`, `ikpy`, etc.).
@@ -107,13 +110,36 @@ This repository tracks the progression of building a local, open-source AI agent
   - [ ] Use Python's `subprocess` to trigger the ASAP `run_seq_plan.py` script.
 - [ ] **Step 3: Full Orchestration**
   - [ ] Wire up the Module 4 Graph: `PlannerAgent → ASAP ExecutorAgent → ReviewerAgent`.
-  - [ ] Have `ReviewerAgent` summarize the ASAP output logs into a markdown report.
-  - [ ] Keep the Module 5 human approval gate active before any `plan_cad_assembly` call.
+  - [ ] Activate the Module 5 human approval gate before any `plan_cad_assembly` call.
+  - [ ] Use the Module 4.5 MCP filesystem server so the `PlannerAgent` discovers assembly files automatically.
+- [ ] **Step 4: Production Hardening**
+  - [ ] Move all configuration (model, Ollama host, ASAP path) to a `.env` file loaded via `python-dotenv`.
+  - [ ] Add a health check at startup — verify Ollama is reachable before the graph runs.
+  - [ ] Build a proper CLI entrypoint using `argparse` or `typer`: `python run.py --assembly beam_assembly`.
+  - [ ] Write the `ReviewerAgent` markdown summary to a timestamped file in `reports/` on every run.
+  - [ ] Add structured Python `logging` throughout — no bare `print()` statements in production code.
 
-## Module 7: Advanced Homelab Escalation (Optional)
-**Goal:** Scale the system with real-world data.
+## Module 7: The Lens (Observability with Langfuse)
+**Goal:** Instrument the production pipeline with open-source observability so every agent run is traceable, evaluatable, and comparable — and swappable for Galileo or any other OpenTelemetry-compatible platform at work.
+
+- [ ] **Step 1: Self-Host Langfuse**
+  - [ ] Deploy Langfuse via Docker Compose on the homelab.
+  - [ ] Verify the dashboard is accessible and the project API keys are generated.
+- [ ] **Step 2: Instrument the Pipeline**
+  - [ ] Connect the Strands agent pipeline to Langfuse via the OpenTelemetry exporter already in `requirements.txt`.
+  - [ ] Run a full ASAP assembly and verify the trace appears in the Langfuse dashboard.
+  - [ ] Inspect the trace: see every agent node, tool call, token count, and latency broken down.
+- [ ] **Step 3: Evaluate**
+  - [ ] Configure an LLM-as-a-judge evaluator in Langfuse to score the `ReviewerAgent`'s summaries.
+  - [ ] Run 3 assemblies and compare scores across runs in the Langfuse experiments view.
+- [ ] **Step 4: The Swap (Optional)**
+  - [ ] Change the OpenTelemetry exporter endpoint to a Galileo endpoint.
+  - [ ] Verify the same traces appear in Galileo with zero changes to agent code — this is the payoff of building on open standards.
+
+## Module 8: Advanced Homelab Escalation (Optional)
+**Goal:** Scale the system with real-world data end-to-end.
 
 - [ ] **Step 1: Custom Data**
   - [ ] Download a custom `.obj` assembly file from the internet.
-  - [ ] Use the MCP filesystem server (from Module 4.5) so the `PlannerAgent` discovers it automatically.
-  - [ ] Run the full pipeline end-to-end without hardcoding the assembly name.
+  - [ ] Use the MCP filesystem server so the `PlannerAgent` discovers it automatically — no hardcoded paths.
+  - [ ] Run the full pipeline end-to-end: discovery → planning → ASAP execution → report → Langfuse trace.

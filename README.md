@@ -89,6 +89,8 @@ Each file in `examples/` builds on the previous one. Run them in order to follow
 | `memory_agent.py` | 3 | Session memory — persist conversation history to disk so the agent remembers across prompts |
 | `context_agent.py` | 3 | Context limits — explicitly control how many messages the model sees at once with `SlidingWindowConversationManager` |
 | `streaming_agent.py` | 3 | Streaming — intercept text chunks and tool calls as they arrive via a callback handler |
+| `multi_agent.py` | 4 | Agents as tools — wrap an `ExecutorAgent` with `@tool` so a `PlannerAgent` can delegate to it; demonstrates a full multi-agent chain: `PlannerAgent → executor_agent() → ExecutorAgent → move_arm()` |
+| `graph_agent.py` | 4 | Graph pipeline — wire three agents (`Planner → Executor → Reviewer`) using `GraphBuilder`; output from each node feeds automatically into the next; inspect each node's result independently via `result.results` |
 
 ## Key Concepts
 
@@ -101,6 +103,10 @@ Each file in `examples/` builds on the previous one. Run them in order to follow
 **`SlidingWindowConversationManager`** — Caps how many messages are loaded into the model's active context per call. Protects local models from context overflow on long conversations. Default window is 40; tune it down for smaller models.
 
 **`callback_handler`** — A function you wire into the agent that fires on every streaming event. Use it to print text as it arrives, display tool calls in progress, or pipe output to a UI.
+
+**Agents as Tools** — Wrap any agent function with `@tool` so a higher-level orchestrator can call it like any other tool. The orchestrator doesn't know or care that a full agent loop is running inside — it just sees a function with a name and a docstring.
+
+**`GraphBuilder`** — Declares a deterministic pipeline of agents. `add_node` registers an agent, `add_edge` declares which node feeds which, `set_entry_point` defines where the prompt enters. The SDK handles execution order and automatically passes each node's output as context to the next. Independent nodes run in parallel; dependent nodes wait. Access every node's output after the run via `result.results["node_id"].result`.
 
 ---
 *Follow along with the detailed progression in `docs/learning-journey.md`.*
