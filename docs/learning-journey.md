@@ -105,46 +105,63 @@ This repository tracks the progression of building a local, open-source AI agent
   - [x] If "y": return normally — execution continues unchanged.
   - [x] Verified: agent handles rejection gracefully and does not retry after "Do not retry." message.
 
-## Module 6: The Capstone (Production-Grade ASAP Integration)
-**Goal:** Replace the mock tools with the real MIT robotic assembly simulator and make the system look and feel production-ready — proper CLI, config, structured reports, and all previous modules working together.
+## Module 6: The Capstone (Containerize Everything + ASAP)
+**Goal:** Move the entire project off the local venv and into Docker. Each concern gets its own container — agent, robot MCP server, ASAP planner. A peer should be able to clone the repo and run `docker-compose up` with no other setup. Then add ASAP as the third container, completing the real pipeline.
 
-- [ ] **Step 1: Clone the ASAP Environment**
-  - [ ] Clone `https://github.com/yunshengtian/ASAP.git` and install its specific dependencies (`trimesh`, `ikpy`, etc.).
-- [ ] **Step 2: Real Tooling**
-  - [ ] Create a new tool: `plan_cad_assembly(assembly_name: str)`.
-  - [ ] Use Python's `subprocess` to trigger the ASAP `run_seq_plan.py` script.
-- [ ] **Step 3: Full Orchestration**
-  - [ ] Wire up the Module 4 Graph: `PlannerAgent → ASAP ExecutorAgent → ReviewerAgent`.
-  - [ ] Activate the Module 5 human approval gate before any `plan_cad_assembly` call.
-  - [ ] Use the Module 4.5 MCP filesystem server so the `PlannerAgent` discovers assembly files automatically.
-- [ ] **Step 4: Production Hardening**
-  - [ ] Move all configuration (model, Ollama host, ASAP path) to a `.env` file loaded via `python-dotenv`.
-  - [ ] Add a health check at startup — verify Ollama is reachable before the graph runs.
-  - [ ] Build a proper CLI entrypoint using `argparse` or `typer`: `python run.py --assembly beam_assembly`.
-  - [ ] Write the `ReviewerAgent` markdown summary to a timestamped file in `reports/` on every run.
-  - [ ] Add structured Python `logging` throughout — no bare `print()` statements in production code.
+> **Why Docker first:** ASAP requires compiling a C++ physics binding. Doing that inside a Dockerfile means it compiles once at build time and never again — no local toolchain required for you or your peers. The Docker image becomes the artifact.
+
+- [ ] **Step 1: Containerize the Agent**
+  - [ ] Write `docker/agent/Dockerfile` — Python base image, copy `requirements.txt`, install deps, copy source.
+  - [ ] Write `docker-compose.yml` with a single `agent` service — verify all existing examples still run inside the container.
+  - [ ] Configure Ollama connectivity: use `host.docker.internal:11434` to reach Ollama running on the host machine.
+  - [ ] Move `LLM_PROVIDER`, Ollama host, and other config into a `.env` file — `docker-compose` picks it up automatically.
+
+- [ ] **Step 2: Containerize the Robot MCP Server**
+  - [ ] Write `docker/robot-mcp/Dockerfile` — same Python base, just the MCP server deps.
+  - [ ] Switch `mcp_server/server.py` from stdio transport to HTTP: `mcp.run(transport="streamable-http", port=8000)`.
+  - [ ] Add `robot-mcp` service to `docker-compose.yml` on an internal Docker network.
+  - [ ] Update agent examples to use `streamablehttp_client` instead of `stdio_client` — one line change.
+  - [ ] Verify `robot_mcp_agent.py` still works end-to-end, now over HTTP between containers.
+
+- [ ] **Step 3: ASAP Container**
+  - [ ] Write `docker/asap/Dockerfile` — clone ASAP, install system build tools, compile C++ binding at build time.
+  - [ ] Add a FastMCP HTTP server (`mcp_server/asap_server.py`) that exposes `plan_cad_assembly(assembly_dir: str)`.
+  - [ ] Add `asap` service to `docker-compose.yml`, mount an `assemblies/` volume for `.obj` input files.
+  - [ ] **Tool:** Install [MeshLab](https://www.meshlab.net) or [Blender](https://www.blender.org/download/) (`brew install --cask blender`) to inspect `.obj` files before feeding them to ASAP.
+  - [ ] Run ASAP manually inside the container first: `docker exec -it asap python run_seq_plan.py --dir assembly_examples/ball` — understand the output before the agent touches it.
+
+- [ ] **Step 4: Full Pipeline**
+  - [ ] Wire `GraphBuilder`: `PlannerAgent → ASAPExecutorAgent → ReviewerAgent`.
+  - [ ] `PlannerAgent`: discovers `.obj` files via the robot MCP server's filesystem tools, picks an assembly.
+  - [ ] `ASAPExecutorAgent`: calls `plan_cad_assembly` on the ASAP MCP server, returns raw planner output.
+  - [ ] `ReviewerAgent`: summarizes into a human-readable markdown report, writes to `reports/` with a timestamp.
+  - [ ] Activate the Module 5 hook — human approval required before `plan_cad_assembly` executes.
+  - [ ] Verify full run: `docker-compose up` → one prompt → plan runs → report written → `docker-compose down`.
 
 ## Module 7: The Lens (Observability with Langfuse)
-**Goal:** Instrument the production pipeline with open-source observability so every agent run is traceable, evaluatable, and comparable — and swappable for Galileo or any other OpenTelemetry-compatible platform at work.
+**Goal:** Instrument the pipeline with open-source observability so every agent run is traceable and evaluatable. Langfuse is the closest open-source equivalent to Galileo — built on OpenTelemetry, so swapping to Galileo or any other platform at work is an endpoint change, not a code change.
 
 - [ ] **Step 1: Self-Host Langfuse**
-  - [ ] Deploy Langfuse via Docker Compose on the homelab.
-  - [ ] Verify the dashboard is accessible and the project API keys are generated.
+  - [ ] Deploy Langfuse via Docker Compose on the homelab server.
+  - [ ] Verify the dashboard is accessible and generate project API keys.
 - [ ] **Step 2: Instrument the Pipeline**
-  - [ ] Connect the Strands agent pipeline to Langfuse via the OpenTelemetry exporter already in `requirements.txt`.
-  - [ ] Run a full ASAP assembly and verify the trace appears in the Langfuse dashboard.
-  - [ ] Inspect the trace: see every agent node, tool call, token count, and latency broken down.
+  - [ ] Set the OpenTelemetry exporter endpoint in `.env` to point at your Langfuse instance.
+  - [ ] Run a full ASAP assembly and verify the trace appears in the dashboard.
+  - [ ] Inspect the trace: every agent node, tool call, token count, and latency — broken down.
 - [ ] **Step 3: Evaluate**
-  - [ ] Configure an LLM-as-a-judge evaluator in Langfuse to score the `ReviewerAgent`'s summaries.
-  - [ ] Run 3 assemblies and compare scores across runs in the Langfuse experiments view.
-- [ ] **Step 4: The Swap (Optional)**
-  - [ ] Change the OpenTelemetry exporter endpoint to a Galileo endpoint.
-  - [ ] Verify the same traces appear in Galileo with zero changes to agent code — this is the payoff of building on open standards.
+  - [ ] Configure an LLM-as-a-judge evaluator in Langfuse to score `ReviewerAgent` summaries.
+  - [ ] Run 3 different assemblies, compare scores across runs in the experiments view.
+- [ ] **Step 4: The Swap (IRL Reference)**
+  - [ ] Change the OpenTelemetry exporter endpoint to a Galileo (or other platform) endpoint.
+  - [ ] Verify the same traces appear — zero agent code changes. This is the payoff of building on open standards.
 
-## Module 8: Advanced Homelab Escalation (Optional)
-**Goal:** Scale the system with real-world data end-to-end.
+## Module 8: Production Data (The Real Thing)
+**Goal:** Point the full pipeline at real production `.obj` files instead of example data — the closest this learning repo gets to what you'll actually do at work.
 
-- [ ] **Step 1: Custom Data**
-  - [ ] Download a custom `.obj` assembly file from the internet.
-  - [ ] Use the MCP filesystem server so the `PlannerAgent` discovers it automatically — no hardcoded paths.
-  - [ ] Run the full pipeline end-to-end: discovery → planning → ASAP execution → report → Langfuse trace.
+- [ ] **Step 1: Real Assembly Files**
+  - [ ] Drop production `.obj` files into an `assemblies/` directory.
+  - [ ] Use the Module 4.5 MCP filesystem server so `PlannerAgent` discovers them automatically — no hardcoded filenames.
+- [ ] **Step 2: End-to-End Run**
+  - [ ] Run the full pipeline: MCP discovery → Planner → ASAP Executor (with human approval gate) → Reviewer report → Langfuse trace.
+  - [ ] Review the generated markdown report in `reports/` and the ASAP `.gif` output side by side.
+  - [ ] Note what breaks or surprises you — those are the real engineering problems for your IRL role.

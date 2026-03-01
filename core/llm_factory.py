@@ -16,9 +16,10 @@ def get_model():
         # Without this, the model silently generates <think> tokens before
         # every response — invisible in output but very slow on CPU hardware.
         # This passes directly through to Ollama's API via the options dict.
+        ollama_host = os.getenv("OLLAMA_HOST", "http://localhost:11434")
         return OllamaModel(
             model_id="qwen3:32b",
-            host="http://localhost:11434",
+            host=ollama_host,
             options={"think": False},
         )
 
