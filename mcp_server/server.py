@@ -18,7 +18,9 @@ from mcp.server.fastmcp import FastMCP
 # This single line is equivalent to what the filesystem server does
 # internally — it creates an MCP-compliant server ready to expose tools.
 
-mcp = FastMCP("robot-tools")
+import os
+_host = os.getenv("MCP_HOST", "127.0.0.1")
+mcp = FastMCP("robot-tools", host=_host)
 
 # --- Slice 2: Exposing the tools ---
 # We import the raw implementations from src/tools/ and re-expose them
@@ -62,4 +64,8 @@ def get_arm_status() -> str:
 # and point it at a port — zero other changes needed.
 
 if __name__ == "__main__":
-    mcp.run()
+    transport = os.getenv("MCP_TRANSPORT", "stdio")
+    if transport == "http":
+        mcp.run(transport="streamable-http")
+    else:
+        mcp.run()

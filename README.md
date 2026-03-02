@@ -2,6 +2,22 @@
 
 Welcome to the Strands Agents learning repository! This project tracks my journey in building a local, open-source AI agent ecosystem to run complex robotic physics simulations using the Strands Agents SDK and MIT's ASAP planner.
 
+## Prerequisites
+
+### ASAP Assembly Data
+The ASAP planner (Module 6+) requires assembly mesh data that is too large to store in git. Download the test set (~124MB) before running the ASAP container:
+
+```bash
+mkdir -p assemblies
+curl -L https://people.csail.mit.edu/yunsheng/ASAP/dataset_2404/test_assembly.zip \
+  -o assemblies/test_assembly.zip
+cd assemblies && unzip test_assembly.zip && cd ..
+```
+
+The `assemblies/` directory is in `.gitignore` — do not commit it.
+
+---
+
 ## Getting Started
 
 If you want to run this code on your own machine, you'll need to set up a Python Virtual Environment. This ensures that the dependencies for this project don't conflict with other Python projects on your system.
