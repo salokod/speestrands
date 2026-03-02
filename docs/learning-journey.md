@@ -124,11 +124,19 @@ This repository tracks the progression of building a local, open-source AI agent
   - [ ] Verify `robot_mcp_agent.py` still works end-to-end, now over HTTP between containers.
 
 - [ ] **Step 3: ASAP Container**
-  - [ ] Write `docker/asap/Dockerfile` — clone ASAP, install system build tools, compile C++ binding at build time.
-  - [ ] Add a FastMCP HTTP server (`mcp_server/asap_server.py`) that exposes `plan_cad_assembly(assembly_dir: str)`.
-  - [ ] Add `asap` service to `docker-compose.yml`, mount an `assemblies/` volume for `.obj` input files.
-  - [ ] **Tool:** Install [MeshLab](https://www.meshlab.net) or [Blender](https://www.blender.org/download/) (`brew install --cask blender`) to inspect `.obj` files before feeding them to ASAP.
-  - [ ] Run ASAP manually inside the container first: `docker exec -it asap python run_seq_plan.py --dir assembly_examples/ball` — understand the output before the agent touches it.
+  - [x] Write `docker/asap/Dockerfile` — clone ASAP, install system build tools, compile C++ binding at build time.
+  - [x] Fix pybind11 / Python version incompatibility: use `python:3.10-slim` (pybind11 v2.9.0 bundled in ASAP is incompatible with Python 3.11+).
+  - [x] Fix OOM during compile: patch `setup.py` with `sed` to replace hardcoded `-j8` with `-j1` before building.
+  - [x] **Pitstop — understand ASAP before wiring it up:**
+    - [x] Drop into the container interactively: `docker run --rm -it speestrands-asap bash`
+    - [x] No example assemblies bundled — downloaded 240-assembly test set (~124MB) from MIT separately. Added to `.gitignore`, download instructions in README Prerequisites.
+    - [x] Understood input format: each assembly is a folder of numbered `.obj` mesh files (one per part) + `contact_graph.json` describing which parts touch.
+    - [x] Understood CLI: `python plan_sequence/run_seq_plan.py --dir <assemblies> --id <id> --planner dfs --generator rand`
+    - [x] Hit aarch64 segfault in `redmax.SDFMesh()` — the C++ physics engine crashes during SDF construction on Apple Silicon. Known architecture compatibility issue; ASAP was developed and tested on x86_64. Chose to move forward: write the MCP server interface now, test end-to-end when deployed on x86.
+    - [x] Output format: planner prints stats to stdout; writes `setup.json` + plan logs to `--log-dir` if specified.
+  - [x] Add a FastMCP HTTP server (`mcp_server/asap_server.py`) that exposes `plan_cad_assembly(assembly_id: str)`.
+  - [x] Add `asap` service to `docker-compose.yml`, mount `assemblies/` volume for `.obj` input files.
+  - [x] Add `ASAP_SERVER_URL=http://asap:8000/mcp` to `.env` — agent uses this to reach the ASAP MCP server inside the Docker network.
 
 - [ ] **Step 4: Full Pipeline**
   - [ ] Wire `GraphBuilder`: `PlannerAgent → ASAPExecutorAgent → ReviewerAgent`.

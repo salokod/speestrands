@@ -9,6 +9,24 @@ services:
     ports:
       - "8000:8000"
 
+  asap:
+    build:
+      context: .
+      dockerfile: docker/asap/Dockerfile
+    environment:
+      MCP_TRANSPORT: http
+      MCP_HOST: "0.0.0.0"
+    ports:
+      - "8001:8000"
+    volumes:
+      - ./assemblies:/app/assemblies
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import socket; s=socket.socket(); s.connect(('localhost',8000)); s.close()\""]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 15s
+
   agent:
     build:
       context: .
@@ -18,5 +36,8 @@ services:
     volumes:
       - ./reports:/app/reports
     depends_on:
-      - robot-mcp
-    command: ["python3", "examples/robot_mcp_agent.py"]
+      robot-mcp:
+        condition: service_started
+      asap:
+        condition: service_healthy
+    command: ["python3", "examples/asap_agent.py"]

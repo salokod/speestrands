@@ -28,3 +28,8 @@ __pycache__/
 # Agent session files
 # Generated at runtime by FileSessionManager — never commit these.
 .agent_sessions/
+
+# ASAP assembly data
+# Downloaded separately — too large for git (hundreds of MB).
+# See README Prerequisites section for download instructions.
+assemblies/
