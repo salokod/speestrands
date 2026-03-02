@@ -32,7 +32,7 @@ RUN git clone https://github.com/yunshengtian/ASAP.git asap
 # numpy must exist first — the C++ extension links against it at compile time.
 # torch and torch-geometric are needed for the neural network-based part selector.
 RUN pip install --no-cache-dir \
-    numpy \
+    "numpy<2" \
     scipy \
     networkx \
     trimesh \

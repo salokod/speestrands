@@ -23,7 +23,8 @@ def plan_cad_assembly(assembly_id: str) -> str:
     assembly_id is the folder name of the assembly to plan (e.g. '00000').
     Returns the planner output including the sequence and planning statistics.
     """
-    result = subprocess.run(
+    # Run the process and stream its output to the server's console in real-time
+    process = subprocess.Popen(
         [
             sys.executable,
             ASAP_SCRIPT,
@@ -32,19 +33,42 @@ def plan_cad_assembly(assembly_id: str) -> str:
             "--planner", "dfs",
             "--generator", "rand",
         ],
-        capture_output=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT, # Merge stderr into stdout
         text=True,
         cwd=ASAP_DIR,
+        bufsize=1, # Line buffered
     )
 
-    if result.returncode != 0:
+    full_output = []
+    print(f"\n--- Starting ASAP Planner for assembly {assembly_id} ---", flush=True)
+    
+    # Stream the output line-by-line to the server logs
+    for line in iter(process.stdout.readline, ''):
+        print(line, end='', flush=True)
+        full_output.append(line)
+        
+    process.stdout.close()
+    returncode = process.wait()
+    
+    print(f"--- Finished ASAP Planner for assembly {assembly_id} (Exit Code: {returncode}) ---\n", flush=True)
+
+    out = "".join(full_output)
+
+    if returncode != 0:
         return (
-            f"Planner failed (exit code {result.returncode}).\n"
-            f"stdout: {result.stdout}\n"
-            f"stderr: {result.stderr}"
+            f"Planner failed (exit code {returncode}).\n"
+            f"Output: {out[-2000:] if out else ''}"
         )
 
-    return result.stdout or "Planner completed with no output."
+    out = out or "Planner completed with no output."
+    
+    # The raw output is extremely verbose and can crash the transport or LLM context.
+    # We only care about the final summary block if it succeeds.
+    if len(out) > 5000:
+        out = f"... [Truncated {len(out) - 5000} chars] ...\n\n" + out[-5000:]
+
+    return out
 
 
 if __name__ == "__main__":
