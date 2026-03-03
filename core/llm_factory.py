@@ -12,14 +12,11 @@ def get_model():
 
     if provider == "ollama":
         print("[System] Using Local Ollama Model (qwen3:32b)")
-        # options={"think": False} disables qwen3's extended internal reasoning mode.
-        # Without this, the model silently generates <think> tokens before
-        # every response — invisible in output but very slow on CPU hardware.
-        # This passes directly through to Ollama's API via the options dict.
         ollama_host = os.getenv("OLLAMA_HOST", "http://localhost:11434")
         return OllamaModel(
             model_id="qwen3:32b",
             host=ollama_host,
+            keep_alive="30m",  # Top-level param — keeps model loaded during long tool calls (e.g. 5+ min ASAP planner)
             options={"think": False},
         )
 

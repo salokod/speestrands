@@ -60,6 +60,12 @@ RUN sed -i 's/-j[0-9]*/-j3/g' asap/simulation/setup.py && \
 
 RUN pip install --no-cache-dir mcp
 
+# Patch upstream bug in ASAP's subdivide.py:
+# edge_length_dict is keyed by (a, b) but edges are sometimes looked up as (b, a).
+# Fix: try both orderings before raising KeyError.
+RUN sed -i 's/longest_edge_length = edge_length_dict\[longest_edge\]/longest_edge_length = edge_length_dict.get(longest_edge) or edge_length_dict.get((longest_edge[1], longest_edge[0]), 0)/' \
+    asap/assets/subdivide.py
+
 COPY mcp_server/asap_server.py mcp_server/asap_server.py
 
 CMD ["python", "mcp_server/asap_server.py"]

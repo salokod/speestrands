@@ -33,6 +33,8 @@ services:
       dockerfile: docker/agent/Dockerfile
     env_file:
       - .env
+    environment:
+      PYTHONUNBUFFERED: "1"
     volumes:
       - ./reports:/app/reports
     depends_on:
