@@ -19,6 +19,8 @@ RUN apt-get update && apt-get install -y \
     libxcursor-dev \
     libxi-dev \
     libxxf86vm-dev \
+    xvfb \
+    ffmpeg \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
@@ -32,7 +34,7 @@ RUN git clone https://github.com/yunshengtian/ASAP.git asap
 # numpy must exist first — the C++ extension links against it at compile time.
 # torch and torch-geometric are needed for the neural network-based part selector.
 RUN pip install --no-cache-dir \
-    numpy \
+    "numpy<2" \
     scipy \
     networkx \
     trimesh \
@@ -59,6 +61,12 @@ RUN sed -i 's/-j[0-9]*/-j3/g' asap/simulation/setup.py && \
     cd asap/simulation && python setup.py install
 
 RUN pip install --no-cache-dir mcp
+
+# Patch upstream bug in ASAP's subdivide.py:
+# edge_length_dict is keyed by (a, b) but edges are sometimes looked up as (b, a).
+# Fix: try both orderings before raising KeyError.
+RUN sed -i 's/longest_edge_length = edge_length_dict\[longest_edge\]/longest_edge_length = edge_length_dict.get(longest_edge) or edge_length_dict.get((longest_edge[1], longest_edge[0]), 0)/' \
+    asap/assets/subdivide.py
 
 COPY mcp_server/asap_server.py mcp_server/asap_server.py
 

@@ -19,7 +19,9 @@ services:
     ports:
       - "8001:8000"
     volumes:
-      - ./assemblies:/app/assemblies
+      - ./assemblies/test_assembly:/app/asap/assets/test_assembly
+      - ./logs:/app/logs
+      - ./renders:/app/renders
     healthcheck:
       test: ["CMD-SHELL", "python -c \"import socket; s=socket.socket(); s.connect(('localhost',8000)); s.close()\""]
       interval: 5s
@@ -33,6 +35,8 @@ services:
       dockerfile: docker/agent/Dockerfile
     env_file:
       - .env
+    environment:
+      PYTHONUNBUFFERED: "1"
     volumes:
       - ./reports:/app/reports
     depends_on:

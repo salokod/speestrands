@@ -1,0 +1,1 @@
+{"budget": 400, "max_grippers": 4, "max_poses": 3, "pose_reuse": 0, "early_term": true, "timeout": null, "plan_grasp": false, "plan_arm": false, "gripper_type": "robotiq-140", "gripper_scale": 0.4, "optimizer": "L-BFGS-B"}
