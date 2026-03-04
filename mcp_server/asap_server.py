@@ -7,9 +7,10 @@ from mcp.server.fastmcp import FastMCP
 _host = os.getenv("MCP_HOST", "127.0.0.1")
 mcp = FastMCP("asap-tools", host=_host)
 
-# The assemblies directory is mounted into the container at /app/assemblies.
-# Each sub-folder is one assembly: a set of .obj part meshes + contact_graph.json.
-ASSEMBLIES_DIR = os.getenv("ASSEMBLIES_DIR", "/app/assemblies/test_assembly")
+# ASAP resolves assemblies as: /app/asap/assets/{ASSEMBLIES_DIR}/{assembly_id}
+# Using a relative name here keeps us inside ASAP's expected assets/ tree,
+# avoiding path resolution issues when ASAP passes asset_folder to RedMax.
+ASSEMBLIES_DIR = os.getenv("ASSEMBLIES_DIR", "test_assembly")
 
 
 ASAP_SCRIPT = "/app/asap/plan_sequence/run_seq_plan.py"
@@ -17,23 +18,47 @@ ASAP_DIR = "/app/asap"
 
 
 @mcp.tool()
-def plan_cad_assembly(assembly_id: str) -> str:
+def plan_cad_assembly(
+    assembly_id: str,
+    max_gripper: int = 4,
+    budget: int = 400,
+    base_part: str = None,
+) -> str:
     """
     Run the ASAP sequence planner on a CAD assembly and return the disassembly plan.
     The planner figures out in what order parts can be removed from the assembled state.
-    assembly_id is the folder name of the assembly to plan (e.g. '00000').
-    Returns the planner output including the sequence and planning statistics.
+    assembly_id: folder name of the assembly (e.g. '00561').
+    max_gripper: number of grippers available to hold parts stable (default 4, higher helps with stability failures).
+    budget: max feasibility evaluations (default 400).
+    base_part: part ID that stays fixed as the foundation (e.g. '0'). Leave None to auto-detect.
     """
+    log_dir = f"/app/logs/{assembly_id}"
+    os.makedirs(log_dir, exist_ok=True)
+
+    render_dir = f"/app/renders/{assembly_id}"
+    os.makedirs(render_dir, exist_ok=True)
+
+    cmd = [
+        "xvfb-run", "--auto-servernum",
+        sys.executable,
+        ASAP_SCRIPT,
+        "--dir", ASSEMBLIES_DIR,
+        "--id", assembly_id,
+        "--planner", "dfs",
+        "--generator", "heur-out",
+        "--max-gripper", str(max_gripper),
+        "--budget", str(budget),
+        "--early-term",
+        "--log-dir", log_dir,
+        "--render",
+        "--record-dir", render_dir,
+    ]
+    if base_part is not None:
+        cmd.extend(["--base-part", str(base_part)])
+
     # Run the process and stream its output to the server's console in real-time
     process = subprocess.Popen(
-        [
-            sys.executable,
-            ASAP_SCRIPT,
-            "--dir", ASSEMBLIES_DIR,
-            "--id", assembly_id,
-            "--planner", "dfs",
-            "--generator", "heur-out",
-        ],
+        cmd,
         stdout=subprocess.PIPE,
         stderr=subprocess.STDOUT, # Merge stderr into stdout
         text=True,
@@ -91,8 +116,8 @@ def subdivide_assembly(assembly_id: str, max_edge: float = 0.05) -> str:
     assembly_id is the folder name of the assembly (e.g. '00000').
     max_edge is the maximum edge length for the subdivision (smaller is more precise). Default 0.05.
     """
-    source_dir = os.path.join(ASSEMBLIES_DIR, assembly_id)
-    target_dir = source_dir # Overwrite in place to be used by the planner
+    source_dir = os.path.join(ASAP_DIR, "assets", ASSEMBLIES_DIR, assembly_id)
+    target_dir = source_dir  # Overwrite in place to be used by the planner
     
     print(f"\n--- Subdividing meshes for assembly {assembly_id} (max_edge={max_edge}) ---", flush=True)
     

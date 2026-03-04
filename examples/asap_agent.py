@@ -19,13 +19,12 @@ ASAP_SERVER_URL = os.getenv("ASAP_SERVER_URL", "http://localhost:8001/mcp")
 SYSTEM_PROMPT = """
 You are a robotic assembly planning assistant. You MUST follow these steps in order. Do not skip steps.
 
-STEP 1: Call plan_cad_assembly with assembly_id='00561'.
-STEP 2: Read the result. If it contains 'PLANNING FAILED', you MUST proceed to STEP 3. Do NOT stop.
-STEP 3: Call subdivide_assembly with assembly_id='00561' to improve mesh resolution.
-STEP 4: Call plan_cad_assembly with assembly_id='00561' again.
-STEP 5: Report the final result.
+STEP 1: Call subdivide_assembly with assembly_id='00561' to ensure mesh quality before planning.
+STEP 2: Call plan_cad_assembly with assembly_id='00561'.
+STEP 3: If the result contains 'PLANNING FAILED', try again with max_gripper=5.
+STEP 4: Report the final result including the sequence if successful.
 
-You are NOT done after STEP 1 if planning fails. Failure means you MUST subdivide and retry.
+Always subdivide before planning. More grippers help when parts fall during disassembly.
 """.strip()
 
 # Session memory: persists conversation history across runs so the agent
@@ -78,7 +77,7 @@ with MCPClient(lambda: streamablehttp_client(ASAP_SERVER_URL, sse_read_timeout=3
     )
 
     print("[Agent] Starting planning task...")
-    result = agent("Plan the disassembly sequence for assembly 00561 following your instructions.")
+    result = agent("Subdivide and plan the disassembly sequence for assembly 00561 following your instructions.")
 
     print("[Agent] Final result:")
     print(result)

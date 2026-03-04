@@ -19,6 +19,8 @@ RUN apt-get update && apt-get install -y \
     libxcursor-dev \
     libxi-dev \
     libxxf86vm-dev \
+    xvfb \
+    ffmpeg \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
